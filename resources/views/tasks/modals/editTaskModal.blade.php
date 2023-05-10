@@ -45,9 +45,12 @@
                                 <img src="{{ asset('storage/images/no_image.jpg') }}" alt="Default Image" class="task-image">
                             @endif
                             <input type="file" name="image" id="image" class="form-control-file" accept="image/*">
+                                <div class="form-group form-check">
+                                    <input type="checkbox" class="form-check-input" id="delete_image" name="delete_image">
+                                    <label class="form-check-label" for="delete_image">Удалить изображение</label>
+                                </div>
                         </div>
                     </div>
-
                     <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
                     <button type="submit" class="btn btn-primary">Сохранить изменения</button>

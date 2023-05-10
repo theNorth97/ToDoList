@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Services\TaskValidationService;
 use App\Models\Tag;
 use App\Models\Task;
 use Illuminate\Http\Request;
@@ -12,24 +13,17 @@ class TaskController extends Controller
 {
     /**
      * Display a listing of the resource.
+     * @param $taskValidationService
      */
 
-    public function store(Request $request)
+    public function store(Request $request, TaskValidationService $taskValidationService)
     {
-        $validated = $request->validate([
-            'title' => ['required', 'min:1', 'max:35', 'required_with:tags'],
-            'tags' => ['required_without_all:tag1,tag2,tag3', 'min:1', 'max:35'],
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
-        ], [
-            'title.required' => 'Поле "Название" не должно быть пустым',
-            'tags.required' => 'Поле "Тег" не должно быть пустым',
-            'status.required' => 'Пожалуйста, выберите статус задачи',
-        ]);
+        $validated = $taskValidationService->validateTask($request);
 
         $task = new Task();
         $task->title = $validated['title'];
         $task->user_id = auth()->id();
-        $task->status = $request->status;
+        $task->status = $request->input('status');
 
         $task->save();
 
@@ -38,33 +32,27 @@ class TaskController extends Controller
         return redirect()->route('tasks.showUserTasks');
     }
 
-    public function edit(Task $task)
+    public function update(Request $request, Task $task, TaskValidationService $taskValidationService)
     {
-        return view('tasks.edit', compact('task'));
-    }
-
-    public function update(Request $request, Task $task)
-    {
-        $validated = $request->validate([
-            'title' => ['required', 'min:3','max:35'],
-            'description' =>['required', 'min:3','max:35'],
-            'status' => 'required|in:В процессе,Выполнена,Выбирите статус',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
-        ]);
+        $validated = $taskValidationService->validateTask($request);
 
         $task->title = $validated['title'];
         $task->description = $request->input('description');
-        $task->status = $request->status;
+        $task->status = $request->input('status');
 
         if ($request->hasFile('image')) {
             $this->updateImage($request, $task);
-        } elseif ($request->input('delete_image')) {
+        }
+
+        if ($request->has('delete_image')) {
             Storage::delete('public/images/' . $task->image);
             $task->image = null;
         }
 
         $this->storeTags($request, $task);
+
         $task->save();
+
         return redirect()->route('tasks.showUserTasks');
     }
 
@@ -76,9 +64,24 @@ class TaskController extends Controller
         $task->image = $filename;
     }
 
+    private function storeTags(Request $request, Task $task)
+    {
+        $tags = array_map('trim', explode(',', $request->input('tags')));
+        $task->tags()->detach();
+        foreach ($tags as $tagName) {
+            $tag = Tag::firstOrCreate(['name' => $tagName]);
+            $task->tags()->attach($tag);
+        }
+    }
+
+    public function edit(Task $task)
+    {
+        return view('tasks.edit', compact('task'));
+    }
+
     public function destroy(Task $task)
     {
-        $task->tags()->detach(); // сначала удаляю все связи с тегами, чтобы они не оставались в БД после удаления задачи.
+        $task->tags()->detach();
         $task->delete();
 
         return redirect()->route('tasks.showUserTasks');
@@ -88,17 +91,6 @@ class TaskController extends Controller
     {
         $tasks = auth()->user()->tasks;
         return view('tasks.showUserTasks', compact('tasks'));
-    }
-
-    public function storeTags(Request $request, Task $task)
-    {
-        $tags = array_map('trim', explode(',', $request->input('tags')));
-        $task->tags()->detach();
-        foreach ($tags as $tagName) {
-            $tag = Tag::firstOrCreate(['name' => $tagName]);
-            $task->tags()->attach($tag);
-        }
-        return redirect()->route('tasks.showUserTasks');
     }
 
     public function filter(Request $request)
