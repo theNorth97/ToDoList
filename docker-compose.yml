@@ -9,45 +9,32 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./src:/var/www
-      - ./nginx/conf.d/:/etc/nginx/conf.d/
+      - ./:/var/www
+      - ./.docker/nginx/conf.d/:/etc/nginx/conf.d/
     depends_on:
       - app
       - db
-
 
   db:
     image: postgres
     container_name: postgres1
     volumes:
-      - ./postgresql/data:/var/lib/postgresql/data
+      - ./.docker/postgresql/data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_DB: blog
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: password
+        - POSTGRES_DB=${DB_DATABASE}
+        - POSTGRES_USER=${DB_USERNAME}
+        - POSTGRES_PASSWORD=${DB_PASSWORD}
 
   # Application Service
   app:
     container_name: blog1
     build:
-      context: ./php
+      context: .docker/php
       dockerfile: Dockerfile
     volumes:
-      - ./src:/var/www
+      - ./:/var/www
     ports:
       - "9000:9000"
     working_dir: /var/www
-
-
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: pgAdmin1
-    ports:
-      - "5050:80"
-    depends_on:
-      - db
-    environment:
-      PGADMIN_DEFAULT_EMAIL: hanieasemi76@gmail.com
-      PGADMIN_DEFAULT_PASSWORD: password
