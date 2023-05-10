@@ -1,20 +1,25 @@
 <?php
 
-namespace App\Http\Services;
+namespace App\Http\Requests;
 
-use Illuminate\Http\Request;
+use Illuminate\Foundation\Http\FormRequest;
 
-class TaskValidationService
+class TaskRequest extends FormRequest
 {
-    public function validateTask(Request $request)
+    public function rules()
     {
-        return $request->validate([
+        return [
             'title' => ['required', 'min:3', 'max:35'],
             'description' => ['required', 'min:3', 'max:255'],
             'status' => 'required|in:В процессе,Выполнена',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'tags' => ['required_without_all:tag1,tag2,tag3', 'min:1', 'max:35'],
-        ], [
+        ];
+    }
+
+    public function messages()
+    {
+        return [
             'title.required' => 'Поле "Название" не должно быть пустым',
             'title.min' => 'Название должно быть не менее :min символов',
             'title.max' => 'Название должно быть не более :max символов',
@@ -28,6 +33,6 @@ class TaskValidationService
             'image.max' => 'Размер файла не должен превышать :max Кб',
             'tags.max' => 'Максимальная длина тега :max символов',
             'tags.required' => 'Поле "Тег" не должно быть пустым',
-        ]);
+        ];
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Services\TaskValidationService;
+use App\Http\Requests\TaskRequest;
 use App\Models\Tag;
 use App\Models\Task;
 use Illuminate\Http\Request;
@@ -16,15 +16,13 @@ class TaskController extends Controller
      * @param $taskValidationService
      */
 
-    public function store(Request $request, TaskValidationService $taskValidationService)
+    public function store(TaskRequest $request)
     {
-        $validated = $taskValidationService->validateTask($request);
 
         $task = new Task();
-        $task->title = $validated['title'];
+        $task->title = $request->validated()['title'];
         $task->user_id = auth()->id();
-        $task->status = $request->input('status');
-
+        $task->status = $request->validated()['status'];
         $task->save();
 
         $this->storeTags($request, $task);
@@ -32,13 +30,12 @@ class TaskController extends Controller
         return redirect()->route('tasks.showUserTasks');
     }
 
-    public function update(Request $request, Task $task, TaskValidationService $taskValidationService)
+    public function update(TaskRequest $request, Task $task)
     {
-        $validated = $taskValidationService->validateTask($request);
 
-        $task->title = $validated['title'];
-        $task->description = $request->input('description');
-        $task->status = $request->input('status');
+        $task->title = $request->validated()['title'];
+        $task->description = $request->validated()['description'];
+        $task->status = $request->validated()['status'];
 
         if ($request->hasFile('image')) {
             $this->updateImage($request, $task);
