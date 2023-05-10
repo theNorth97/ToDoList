@@ -51,8 +51,12 @@ DB_PASSWORD=ваши данные
 
 8. Выполните миграции:
 ```
-8. php artisan migrate или docker-compose exec app php artisan migrate 
-8. ```
+php artisan migrate   
+ ```
+или
+```
+docker-compose exec app php artisan migrate
+ ```
 
 9. Далее вы можете пользотваться сервисом :
 
