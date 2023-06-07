@@ -3,11 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\TaskRequest;
-use App\Models\Tag;
 use App\Models\Task;
+use App\Services\TaskTagService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
+use App\Services\TaskImageService;
+use App\Services\TaskService;
 
 class TaskController extends Controller
 {
@@ -18,57 +19,44 @@ class TaskController extends Controller
 
     public function store(TaskRequest $request)
     {
-
         $task = new Task();
         $task->title = $request->validated()['title'];
+        $task->description = $request->validated()['description'];
         $task->user_id = auth()->id();
         $task->status = $request->validated()['status'];
+        $task->order = Task::where('user_id', auth()->id())->max('order') + 1; //сохраняю следующий порядковый номер
         $task->save();
 
-        $this->storeTags($request, $task);
+        $taskTagService = new TaskTagService();
+        $taskTagService->storeTags($request, $task);
+
+        if ($request->hasFile('image')) {
+            $taskImageService = new TaskImageService();
+            $taskImageService->CreateImage($request, $task);
+        }
 
         return redirect()->route('tasks.showUserTasks');
+
     }
 
     public function update(TaskRequest $request, Task $task)
     {
-
         $task->title = $request->validated()['title'];
-        $task->description = $request->validated()['description'];
         $task->status = $request->validated()['status'];
-
-        if ($request->hasFile('image')) {
-            $this->updateImage($request, $task);
-        }
-
-        if ($request->has('delete_image')) {
-            Storage::delete('public/images/' . $task->image);
-            $task->image = null;
-        }
-
-        $this->storeTags($request, $task);
-
+        $task->description = $request->validated()['description'];
         $task->save();
 
-        return redirect()->route('tasks.showUserTasks');
-    }
+        $taskImageService = new TaskImageService();
+        $taskImageService->CreateImage($request, $task);
 
-    protected function updateImage(Request $request, Task $task)
-    {
-        $image = $request->file('image');
-        $filename = time() . '.' . $image->getClientOriginalExtension();
-        $path = $image->storeAs('public/images', $filename);
-        $task->image = $filename;
-    }
+        $taskTagService = new TaskTagService();
+        $taskTagService->storeTags($request, $task);
 
-    private function storeTags(Request $request, Task $task)
-    {
-        $tags = array_map('trim', explode(',', $request->input('tags')));
-        $task->tags()->detach();
-        foreach ($tags as $tagName) {
-            $tag = Tag::firstOrCreate(['name' => $tagName]);
-            $task->tags()->attach($tag);
+        if ($request->has('delete_image')) {
+            $taskImageService->deleteImage($task);
         }
+
+        return redirect()->route('tasks.showUserTasks');
     }
 
     public function edit(Task $task)
@@ -78,15 +66,17 @@ class TaskController extends Controller
 
     public function destroy(Task $task)
     {
-        $task->tags()->detach();
-        $task->delete();
-
+        $userId = auth()->id();
+        if ($task->user_id === $userId) {
+            $taskService = new TaskService();
+            $taskService->deleteTask($task);
+        }
         return redirect()->route('tasks.showUserTasks');
     }
 
     public function showUserTasks()
     {
-        $tasks = auth()->user()->tasks;
+        $tasks = auth()->user()->tasks()->paginate(5);
         return view('tasks.showUserTasks', compact('tasks'));
     }
 
@@ -108,11 +98,9 @@ class TaskController extends Controller
                 return $query->where('status', $status);
             })
             ->when($tag, function($query, $tag) {
-                return $query->whereHas('tags', function($query) use ($tag) {
-                    $query->where('name', $tag);
-                });
+                return $query->where('tags', 'like', '%'.$tag.'%');
             })
-            ->get();
+            ->paginate();
 
         return view('tasks.showUserTasks', compact('tasks'));
     }

@@ -19,7 +19,9 @@ class Task extends Model
         'title',
         'description',
         'image_path',
-        'tags',
+        'status',
+        'order',
+        'images',
     ];
 
     /**

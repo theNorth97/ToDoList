@@ -11,21 +11,25 @@ RUN apt-get update && apt-get install -y \
         libvpx-dev \
         libzip-dev \
         libxml2-dev \
+        libmagickwand-dev \
+        libmagickcore-dev \
+    && docker-php-ext-configure gd \
+        --with-freetype=/usr/include/ \
+        --with-jpeg=/usr/include/ \
+        --with-xpm=/usr/lib/x86_64-linux-gnu/ \
+    && docker-php-ext-install -j$(nproc) gd \
+    && pecl install imagick \
+    && docker-php-ext-enable imagick \
     && pecl install xdebug \
     && docker-php-ext-enable xdebug \
-    && docker-php-ext-install -j$(nproc) gd \
     && docker-php-ext-install -j$(nproc) intl \
     && docker-php-ext-install -j$(nproc) zip \
     && docker-php-ext-install -j$(nproc) pgsql \
     && docker-php-ext-install -j$(nproc) pdo_pgsql \
     && docker-php-ext-install -j$(nproc) exif \
     && docker-php-ext-install -j$(nproc) dom \
-    && docker-php-ext-configure gd \
-        --with-freetype=/usr/include/ \
-        --with-jpeg=/usr/include/ \
-        --with-xpm=/usr/lib/x86_64-linux-gnu/
+    && pecl install mcrypt && docker-php-ext-enable mcrypt \
+    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-RUN pecl install mcrypt && docker-php-ext-enable mcrypt
 
-# Install Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+

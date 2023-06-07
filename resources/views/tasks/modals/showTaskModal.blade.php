@@ -9,15 +9,15 @@
                 </button>
             </div>
             <div class="modal-body">
-                <p><strong>№:</strong> {{ $task->id }} </p>
+                <p><strong>№:</strong> {{ $task->order }} </p>
                 <p><strong>Описание:</strong> {{ $task->description }}</p>
                 <p><strong>Статус:</strong> {{ $task->status }}</p>
                 <p><strong>Создана:</strong> {{ $task->created_at }}</p>
                 <p><strong>Обновлена:</strong> {{ $task->updated_at }}</p>
-                <p><strong>Тег:</strong> {{ $task->tags->isNotEmpty() ? $task->tags->first()->name : 'Отсутствует' }}</p>
-                @if ($task->image)
-                    <a href="{{ asset('storage/images/' . $task->image) }}" target="_blank">
-                        <img src="{{ asset('storage/images/' . $task->image) }}" alt="{{ $task->title }}" width="150" height="150">
+                <p><strong>Тег:</strong> {{ $task->tags }}</p>
+            @if ($task->images)
+                    <a href="{{ asset('images/tasks/' . $task->images) }}" target="_blank">
+                        <img src="{{ asset('images/tasks/' . $task->images) }}" alt="{{ $task->title }}" width="150" height="150">
                     </a>
                 @else
                     <img src="{{ asset('storage/images/no_image.jpg') }}" alt="Default Image" width="150" height="150">

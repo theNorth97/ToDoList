@@ -1,6 +1,11 @@
 @extends('layouts.app')
 @section('content')
-    <div class="container">
+                                            <!-- Создание задачи -->
+    <button type="button" class="btn btn-primary rounded-circle" data-toggle="modal" data-target="#createTaskModal">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <div class="container" id="tasklist">
         <h1>Список задач</h1>
 
         <div class="filter-section text-center">
@@ -16,6 +21,7 @@
         </div>
 
         <form method="GET" action="{{ route('tasks.filter') }}" class="row g-3 align-items-center">
+
             <div class="col-auto">
                 <label for="title" class="form-label">Наименование:</label>
                 <input type="text" class="form-control" name="title" id="title">
@@ -43,54 +49,7 @@
 
         </form>
 
-        <style>
-
-            .filter-button {
-                margin-top: 14px;
-            }
-
-            table td, table th {
-                padding-top: 0;
-                padding-bottom: 0;
-                vertical-align: middle;
-            }
-
-
-            h1 {
-                text-align: center;
-            }
-
-            .task-image {
-                object-fit: cover;
-                width: 130px;
-                height: 130px;
-            }
-
-            .filter-section {
-                margin-bottom: 20px;
-                margin-top: 20px;
-                text-align: center;
-            }
-
-            #search-no-results {
-                text-align: center;
-            }
-
-            .filter-section {
-                margin-bottom: 20px;
-            }
-
-            #search {
-                max-width: 400px;
-            }
-
-            #filter-btn {
-                margin-left: 10px;
-            }
-
-        </style>
-
-    @if ($tasks->count())
+        @if ($tasks->count())
             <table class="table">
                 <thead>
                 <tr>
@@ -104,20 +63,20 @@
                 </thead>
                 <tbody>
                 @foreach ($tasks as $task)
-                    <tr>
+                    <tr class="task-row">
 
                         <!-- Столбец для превью изображения -->
                         <td>
-                            @if ($task->image)
-                                <a href="{{ asset('storage/images/' . $task->image) }}" target="_blank">
-                                    <img src="{{ asset('storage/images/' . $task->image) }}" alt="{{ $task->title }}" class="task-image">
+                            @if ($task->images)
+                                <a href="{{ asset('images/tasks/' . $task->images) }}" target="_blank">
+                                    <img src="{{ asset('images/tasks/' . $task->images) }}" alt="{{ $task->title }}" class="task-image">
                                 </a>
                             @else
                                 <img src="{{ asset('storage/images/no_image.jpg') }}" alt="Default Image" class="task-image">
                             @endif
                         </td>
 
-                        <td>{{ $task->tags->isNotEmpty() ? $task->tags->first()->name : '-' }}</td>
+                        <td>{{ $task->tags }}</td>
                         <td>{{ $task->title }}</td>
                         <td>{{ $task->description }}</td>
                         <td>{{ $task->status }}</td>
@@ -141,43 +100,40 @@
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-danger " style="display: block;">Удалить</button>
                             </form>
-                        </td>
 
+                    </tr>
                 @endforeach
                 </tbody>
             </table>
+            <!-- Пагинация -->
+            @if ($tasks->lastPage() > 1)
+                <nav role="navigation" aria-label="Pagination Navigation" class="flex items-center justify-between">
+                    <!-- Pagination Code  -->
+                    <div class="pagination-container">
+                        {{ $tasks->links() }}
+                    </div>
+                </nav>
+            @endif
+
         @else
             <div class="text-center my-5">
                 <p>Задачи отсутствуют</p>
             </div>
         @endif
 
-        <div class="text-center my-5">
-            <button class="btn btn-primary btn-create-task">Создать задачу</button>
-        </div>
         <!-- кнопка  вызова модального окна для создания задачи -->
-            <form id="createTaskFormModal"  method="POST" action="{{ route('tasks.store') }}">
-                {{ csrf_field() }}
-                @include('tasks.modals.createTaskModal')
+        <form id="createTaskFormModal"  method="POST" action="{{ route('tasks.store') }}">
+            {{ csrf_field() }}
+            @include('tasks.modals.createTaskModal')
 
-
-
-{{--                <div class="container">--}}
-{{--                    <form action="{{ route('image.upload') }}" method="post" enctype="multipart/form-data">--}}
-{{--                        {{ csrf_field() }}--}}
-
-{{--                        <div class="form-group">--}}
-{{--                            <input type="file" name="image">--}}
-{{--                        </div>--}}
-{{--                        <button class="btn btn-default" type="submit">загрузка!</button>--}}
-{{--                    </form>--}}
-
-{{--                    @isset($path)--}}
-{{--                        <img class="img-fluid" src="{{ asset('/storage/' . $path) }}" alt="">--}}
-{{--                    @endisset--}}
-{{--                </div>--}}
+             <!-- подключаю js поиск -->
+        <script src="{{ asset('js/search.js') }}"></script>
+            <!-- подключаю css  -->
+        <link href="{{ asset('css/styleShowUserTasks.css') }}" rel="stylesheet">
+        <link href="{{ asset('css/stylePaginate.css') }}" rel="stylesheet">
 
 @endsection
+
 
 
 

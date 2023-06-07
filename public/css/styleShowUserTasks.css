@@ -1,0 +1,63 @@
+/*Кнопка фильтровать*/
+.filter-button {
+    margin-top: 14px;
+}
+
+/*все value задач*/
+table td, table th {
+    padding-top: 0;
+    padding-bottom: 0;
+    vertical-align: middle;
+    border-radius: 10px;
+}
+
+/*Список задач(Заголовок)*/
+h1 {
+    text-align: center;
+}
+/**/
+/*Для превью изображения задачи*/
+.task-image {
+    object-fit: cover;
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+/*Для фильтра*/
+.filter-section {
+    margin-bottom: 20px;
+    margin-top: 20px;
+    text-align: center;
+}
+
+/*Для кнопки поиска*/
+#search {
+    max-width: 400px;
+}
+
+/*Для кнопки создать задачу*/
+.btn-primary.rounded-circle {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    background-color: #ff6c00;
+    color: #ffffff;
+    font-size: 20px;
+    line-height: 40px;
+    text-align: center;
+    z-index: 9999;
+}
+
+
+
+/*!* CSS код для скрытия пагинации, если страниц больше нет *!*/
+/*.pagination-container:last-child {*/
+/*    display: none;*/
+/*}*/
+
+

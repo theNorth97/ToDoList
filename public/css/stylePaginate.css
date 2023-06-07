@@ -1,0 +1,10 @@
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.5rem;
+    opacity: 0.9;
+    font-size: 14px;
+    padding: 0.4rem 0.8rem;
+    line-height: 1;
+    vertical-align: middle;
+}
