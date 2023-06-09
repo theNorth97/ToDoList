@@ -23,11 +23,7 @@
 git clone https://github.com/theNorth97/ToDoList.git
  ```
 
-2. Перейдите в папку проекта:
- ```
- cd ./toDoList и создайте файл .env
-```
-3. Напишите в .env данные для входа в БД:
+2. Напишите в .env данные для входа в БД:
 ```
 DB_CONNECTION=pgsql
 DB_HOST=db
@@ -37,19 +33,19 @@ DB_USERNAME=ваши данные
 DB_PASSWORD=ваши данные
 ```
 
-4. Установите зависимости:
+3. Установите зависимости:
 ```composer install```
 
-5. Создайте контейнеры:
+4. Создайте контейнеры:
 ```docker compose build```
 
-6. Запустите их:
+5. Запустите их:
 ```docker compose up -d```
 
-7. Проверьте созданные docker-контейнеры:
+6. Проверьте созданные docker-контейнеры:
 ```docker ps```
 
-8. Выполните миграции:
+7. Выполните миграции:
 ```
 php artisan migrate   
  ```
@@ -58,7 +54,7 @@ php artisan migrate
 docker-compose exec app php artisan migrate
  ```
 
-9. Далее вы можете пользотваться сервисом :
+8. Далее вы можете пользотваться сервисом :
 
 ```
 http://localhost/register - Регистрация пользотвателя
